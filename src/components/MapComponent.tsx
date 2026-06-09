@@ -15,8 +15,21 @@ const customIcon = new L.Icon({
   shadowSize: [41, 41]
 });
 
-export default function MapComponent() {
-  const defaultCenter: [number, number] = [-33.448, -70.669];
+// Definimos la interfaz de lo que el mapa espera recibir
+interface NodoMap {
+  id: string;
+  lat: number;
+  lng: number;
+  ultimaActualizacion: Date;
+}
+
+interface MapComponentProps {
+  nodosActivos: NodoMap[];
+}
+
+export default function MapComponent({ nodosActivos }: MapComponentProps) {
+  // Centro por defecto (ubicación del T-Beam: 35.36046, -120.84578)
+  const defaultCenter: [number, number] = [35.36046, -120.84578];
 
   return (
     <MapContainer 
@@ -29,27 +42,21 @@ export default function MapComponent() {
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
       
-      {/* Nodo de Prueba 1: Santiago Centro */}
-      <Marker position={[-33.448, -70.669]} icon={customIcon}>
-        <Popup>
-          <div className="text-sm">
-            <p className="font-bold text-blue-600">Nodo Gateway</p>
-            <p>Ubicación: Santiago Centro</p>
-            <p>Estado: <span className="text-green-500 font-semibold">Online</span></p>
-          </div>
-        </Popup>
-      </Marker>
-
-      {/* Nodo de Prueba 2: Macul (Cerca de UTEM) */}
-      <Marker position={[-33.466, -70.598]} icon={customIcon}>
-        <Popup>
-          <div className="text-sm">
-            <p className="font-bold text-blue-600">Nodo LoRa 01</p>
-            <p>Ubicación: Macul</p>
-            <p>Batería: 85%</p>
-          </div>
-        </Popup>
-      </Marker>
+      {/* Mapeamos (iteramos) sobre los nodos que lleguen por Socket */}
+      {nodosActivos.map((nodo) => (
+        <Marker key={nodo.id} position={[nodo.lat, nodo.lng]} icon={customIcon}>
+          <Popup>
+            <div className="text-sm">
+              <p className="font-bold text-blue-600">Nodo: {nodo.id}</p>
+              <p>Lat: {nodo.lat.toFixed(5)}</p>
+              <p>Lng: {nodo.lng.toFixed(5)}</p>
+              <p className="text-xs text-gray-500 mt-1">
+                Actualizado: {nodo.ultimaActualizacion.toLocaleTimeString()}
+              </p>
+            </div>
+          </Popup>
+        </Marker>
+      ))}
     </MapContainer>
   );
 }

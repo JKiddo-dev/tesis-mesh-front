@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, RotateCcw, Calendar, MapPin } from 'lucide-react';
 import dynamic from 'next/dynamic';
 
@@ -17,30 +17,71 @@ const TrackingMap = dynamic(() => import('../../../components/TrackingMap'), {
 });
 
 export default function TrackeoPage() {
-  const [dispositivo, setDispositivo] = useState('');
+  const [dispositivo, setDispositivo] = useState(''); 
+  const [nodosDisponibles, setNodosDisponibles] = useState<string[]>([]);
   const [fechaInicio, setFechaInicio] = useState('');
   const [fechaFin, setFechaFin] = useState('');
-  const [mostrarRuta, setMostrarRuta] = useState(false);
+  const [rutaHistorica, setRutaHistorica] = useState<[number, number][]>([]);
+  const [cargando, setCargando] = useState(false);
 
-  const handleVerTrackeo = (e: React.FormEvent) => {
+  useEffect(() => {
+    const cargarNodos = async () => {
+      try {
+        const respuesta = await fetch('http://localhost:4000/telemetry/nodes');
+        if (respuesta.ok) {
+          const nodos = await respuesta.json();
+          setNodosDisponibles(nodos);
+        }
+      } catch (error) {
+        console.error('Error cargando la lista de nodos disponibles', error);
+      }
+    }
+    cargarNodos();
+  }, [])
+  
+
+  const handleVerTrackeo = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!dispositivo || !fechaInicio || !fechaFin) {
-      alert('Por favor completa todos los campos para buscar el historial.');
+    
+    if (!dispositivo) {
+      alert('Por favor selecciona un dispositivo.');
       return;
     }
-    setMostrarRuta(true);
+
+    setCargando(true);
+    try {
+      const respuesta = await fetch('http://localhost:4000/telemetry/history');
+      if (!respuesta.ok) throw new Error('Error al obtener datos');
+      
+      const historial = await respuesta.json();
+
+      const puntosRuta: [number, number][] = historial
+        .filter((punto: any) => punto.nodoId === dispositivo)
+        .map((punto: any) => [punto.latitud, punto.longitud]);
+
+      if (puntosRuta.length === 0) {
+        alert('No se encontraron coordenadas para este nodo.');
+      } else {
+        setRutaHistorica(puntosRuta);
+      }
+
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Hubo un problema contactando al servidor.');
+    } finally {
+      setCargando(false);
+    }
   };
 
   const handleResetear = () => {
-    setDispositivo('');
+    setDispositivo('4145953316');
     setFechaInicio('');
     setFechaFin('');
-    setMostrarRuta(false); 
+    setRutaHistorica([]); 
   };
 
   return (
     <div className="flex flex-col gap-6">
-      
       <div>
         <h1 className="text-2xl font-bold text-gray-800">Historial de Trackeo</h1>
         <p className="text-gray-500 text-sm mt-1">Consulta las rutas históricas de los nodos Mesh</p>
@@ -59,14 +100,17 @@ export default function TrackeoPage() {
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 bg-white"
               >
                 <option value="">Seleccione un nodo...</option>
-                <option value="LILYGO-01">LILYGO-01 (Gateway)</option>
-                <option value="LILYGO-02">LILYGO-02 (Móvil)</option>
+                {nodosDisponibles.map((nodo) => (
+                  <option key={nodo} value={nodo}>
+                    Nodo: {nodo}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Desde</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Desde (Opcional)</label>
             <div className="relative">
               <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
               <input 
@@ -79,7 +123,7 @@ export default function TrackeoPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Hasta</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Hasta (Opcional)</label>
             <div className="relative">
               <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
               <input 
@@ -94,10 +138,11 @@ export default function TrackeoPage() {
           <div className="flex gap-2">
             <button 
               type="submit"
-              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 text-sm font-medium transition-colors"
+              disabled={cargando}
+              className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 text-sm font-medium transition-colors"
             >
               <Search size={18} />
-              Ver Trackeo
+              {cargando ? 'Buscando...' : 'Ver Trackeo'}
             </button>
             <button 
               type="button"
@@ -108,14 +153,12 @@ export default function TrackeoPage() {
               <RotateCcw size={18} />
             </button>
           </div>
-
         </form>
       </div>
 
-      <div className="h-160 w-full bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden relative">
-        <TrackingMap mostrarRuta={mostrarRuta} />
+      <div className="h-[500px] w-full bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden relative">
+        <TrackingMap ruta={rutaHistorica} />
       </div>
-
     </div>
   );
 }

@@ -1,8 +1,9 @@
 'use client';
 
-import { MapContainer, TileLayer, Polyline, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Polyline, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
+import { useEffect } from 'react';
 
 const customIcon = new L.Icon({
   iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
@@ -15,20 +16,23 @@ const customIcon = new L.Icon({
 });
 
 interface TrackingMapProps {
-  mostrarRuta: boolean;
+  ruta: [number, number][]; 
 }
 
-export default function TrackingMap({ mostrarRuta }: TrackingMapProps) {
-  // Simulación de un trackeo desde Santiago Centro hacia Macul
-  const rutaSimulada: [number, number][] = [
-    [-33.448, -70.669], // Inicio: Santiago Centro
-    [-33.452, -70.650], // Punto intermedio
-    [-33.458, -70.635], // Punto intermedio
-    [-33.466, -70.598]  // Fin: UTEM Macul
-  ];
+function AutoFitBounds({ ruta }: { ruta: [number, number][] }) {
+  const map = useMap();
+  useEffect(() => {
+    if (ruta.length > 0) {
+      const bounds = L.latLngBounds(ruta);
+      map.fitBounds(bounds, { padding: [50, 50] });
+    }
+  }, [ruta, map]);
+  return null;
+}
 
-  
-  const defaultCenter: [number, number] = [-33.455, -70.630];
+export default function TrackingMap({ ruta }: TrackingMapProps) {
+  // Centro por defecto (UTEM Macul)
+  const defaultCenter: [number, number] = [-33.466, -70.598];
 
   return (
     <MapContainer 
@@ -41,28 +45,27 @@ export default function TrackingMap({ mostrarRuta }: TrackingMapProps) {
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
       
-  
-      {mostrarRuta && (
+      {ruta.length > 0 && <AutoFitBounds ruta={ruta} />}
+
+      {ruta.length > 1 && (
         <>
           <Polyline 
-            positions={rutaSimulada} 
+            positions={ruta} 
             color="#2563eb" 
             weight={4} 
             opacity={0.8} 
             dashArray="10, 10" 
           />
           
-          <Marker position={rutaSimulada[0]} icon={customIcon}>
+          <Marker position={ruta[0]} icon={customIcon}>
             <Popup>
               <div className="font-bold text-blue-600">Punto de Inicio</div>
-              <div className="text-xs text-gray-500">Santiago Centro</div>
             </Popup>
           </Marker>
 
-          <Marker position={rutaSimulada[rutaSimulada.length - 1]} icon={customIcon}>
+          <Marker position={ruta[ruta.length - 1]} icon={customIcon}>
             <Popup>
-              <div className="font-bold text-green-600">Punto Final</div>
-              <div className="text-xs text-gray-500">Macul</div>
+              <div className="font-bold text-green-600">Punto Final / Actual</div>
             </Popup>
           </Marker>
         </>
