@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Terminal, Activity, Clock, Download, Filter, Radio } from 'lucide-react';
-import { io } from 'socket.io-client'; // Importamos el cliente de Sockets
+import { Terminal, Activity, Clock, Filter } from 'lucide-react';
+import { io } from 'socket.io-client';
 
 interface MensajeMesh {
   id: string;
@@ -20,7 +20,44 @@ export default function MensajesPage() {
   const mensajesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Conectado al puerto 4000 de nestjs
+    const cargarHistorial = async () => {
+      try {
+        const respuesta = await fetch('http://localhost:4000/telemetry/messages');
+        if (respuesta.ok) {
+          const historial = await respuesta.json();
+          
+          const mensajesHistoricos: MensajeMesh[] = historial.map((doc: any) => {
+            let textoPayload = '';
+            
+            if (doc.tipoPaquete === 'position') {
+              textoPayload = `GPS: Lat ${doc.latitud || 'N/A'}, Lng ${doc.longitud || 'N/A'}`;
+            } else if (doc.tipoPaquete === 'text') {
+              textoPayload = `Mensaje: ${doc.mensajeTexto || 'Sin texto'}`;
+            } else {
+              textoPayload = `Sistema: Paquete tipo '${doc.tipoPaquete}' guardado.`;
+            }
+
+            return {
+              id: doc._id,
+              nodoOrigen: doc.nodoId,
+              payload: textoPayload,
+              rssi: doc.metadatos?.rxRssi || 0,
+              timestamp: new Date(doc.createdAt),
+              tipo: doc.tipoPaquete
+            };
+          }); // <-- Corregido aquí
+
+          setMensajes(mensajesHistoricos);
+        }
+      } catch (error) {
+        console.error('Error cargando historial de mensajes:', error);
+      }
+    };
+
+    cargarHistorial();
+  }, []);
+
+  useEffect(() => {
     const socket = io('http://localhost:4000');
 
     socket.on('connect', () => {
@@ -51,7 +88,7 @@ export default function MensajesPage() {
 
       const nuevoMensaje: MensajeMesh = {
         id: payload.id ? payload.id.toString() : Math.random().toString(36).substring(7),
-        nodoOrigen: payload.sender || 'Desconocido',
+        nodoOrigen: payload.fromStr || payload.from || 'Desconocido', 
         payload: textoPayload,
         rssi: payload.rxRssi || 0, 
         timestamp: new Date(),
@@ -71,9 +108,11 @@ export default function MensajesPage() {
     mensajesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [mensajes]);
 
+  const nodosUnicos = Array.from(new Set(mensajes.map(m => m.nodoOrigen)));
+
   const mensajesFiltrados = filtroNodo === 'Todos' 
     ? mensajes 
-    : mensajes.filter(m => m.nodoOrigen === filtroNodo);
+    : mensajes.filter(m => String(m.nodoOrigen) === String(filtroNodo));
 
   return (
     <div className="flex flex-col gap-6 h-full">
@@ -87,26 +126,29 @@ export default function MensajesPage() {
 
       <div className="flex-1 flex flex-col md:flex-row gap-4 min-h-[500px]">
         
-        {/* Panel Izquierdo */}
         <div className="w-full md:w-64 bg-white rounded-xl shadow-sm border border-gray-200 p-4 shrink-0 flex flex-col gap-4">
           <div className="flex items-center gap-2 text-gray-800 font-semibold border-b border-gray-100 pb-2">
             <Filter size={18} /> Filtros
           </div>
           
-          <div className="space-y-2">
+          <div className="space-y-2 overflow-y-auto max-h-60 scrollbar-thin scrollbar-thumb-gray-300">
             <button 
               onClick={() => setFiltroNodo('Todos')}
               className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${filtroNodo === 'Todos' ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-50'}`}
             >
               Todos los Nodos
             </button>
-            <button 
-              onClick={() => setFiltroNodo('3a24')} 
-              className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center justify-between ${filtroNodo === '3a24' ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-50'}`}
-            >
-              <span>Meshtastic (3a24)</span>
-              <span className="w-2 h-2 rounded-full bg-green-500"></span>
-            </button>
+            
+            {nodosUnicos.map((nodoId) => (
+              <button 
+                key={nodoId}
+                onClick={() => setFiltroNodo(nodoId)} 
+                className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center justify-between ${filtroNodo === nodoId ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-50'}`}
+              >
+                <span className="truncate pr-2">Nodo: {nodoId}</span>
+                <span className="w-2 h-2 rounded-full bg-green-500 shrink-0"></span>
+              </button>
+            ))}
           </div>
 
           <div className="mt-auto bg-gray-50 p-3 rounded-lg border border-gray-100">
@@ -120,13 +162,12 @@ export default function MensajesPage() {
           </div>
         </div>
 
-        {/* Panel Central (Consola) */}
         <div className="flex-1 bg-slate-900 rounded-xl shadow-sm border border-gray-800 flex flex-col overflow-hidden font-mono text-sm">
           
           <div className="bg-slate-800 px-4 py-2 border-b border-slate-700 flex justify-between items-center text-slate-300">
             <div className="flex items-center gap-2">
               <Terminal size={16} />
-              <span>Log de Tráfico (Real-time)</span>
+              <span>Log de Tráfico (Real-time + Historial)</span>
             </div>
           </div>
 
@@ -139,7 +180,8 @@ export default function MensajesPage() {
                   <div className="flex justify-between items-start mb-2">
                     <div className="flex items-center gap-2">
                       <span className="text-blue-400 font-bold">{msg.nodoOrigen}</span>
-                      <span className="text-slate-500 text-xs text-purple-400">[{msg.tipo}]</span>
+                      {/* Conflicto de Tailwind arreglado aquí */}
+                      <span className="text-xs text-purple-400">[{msg.tipo}]</span>
                     </div>
                     <div className="flex items-center gap-3 text-xs text-slate-400">
                       <span className="flex items-center gap-1">
