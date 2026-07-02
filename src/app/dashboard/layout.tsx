@@ -2,8 +2,8 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Map, Users, Route, MessageSquare, LogOut, Menu, Activity } from 'lucide-react';
-import { useState } from 'react';
+import { Map, Users, Route, MessageSquare, LogOut, Menu, Activity, UserCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 export default function DashboardLayout({
   children,
@@ -13,6 +13,29 @@ export default function DashboardLayout({
   const pathname = usePathname();
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  
+  const [nombreUsuario, setNombreUsuario] = useState('');
+  const [rolUsuario, setRolUsuario] = useState('');
+
+  useEffect(() => {
+    const token = localStorage.getItem('mesh_token');
+    const userStr = localStorage.getItem('mesh_user');
+
+    if (!token) {
+      router.push('/login');
+      return;
+    }
+
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        setNombreUsuario(user.nombre);
+        setRolUsuario(user.rol);
+      } catch (error) {
+        console.error('Error leyendo los datos del usuario');
+      }
+    }
+  }, [router]);
 
   const menuItems = [
     { name: 'Ubicación (Mapa)', href: '/dashboard', icon: Map },
@@ -23,7 +46,8 @@ export default function DashboardLayout({
   ];
 
   const handleLogout = () => {
-    alert('Cerrando sesión...');
+    localStorage.removeItem('mesh_token');
+    localStorage.removeItem('mesh_user');
     router.push('/login');
   };
 
@@ -57,16 +81,25 @@ export default function DashboardLayout({
           })}
         </nav>
 
-        <div className="p-4 border-t border-gray-200">
+        <div className="p-4 border-t border-gray-200 bg-gray-50">
+          <div className="flex items-center gap-3 px-3 mb-4">
+            <UserCircle size={32} className="text-gray-400" />
+            <div className="overflow-hidden">
+              <p className="text-sm font-bold text-gray-800 truncate">{nombreUsuario || 'Cargando...'}</p>
+              <p className="text-xs font-medium text-blue-600">{rolUsuario}</p>
+            </div>
+          </div>
+
           <button 
             onClick={handleLogout}
             className="flex items-center gap-3 px-3 py-2 w-full text-left text-red-600 rounded-lg hover:bg-red-50 transition-colors"
           >
             <LogOut size={20} />
-            Cerrar Sesión
+            <span className="text-sm font-medium">Cerrar Sesión</span>
           </button>
-          <div className="text-center">
-            <p className="text-xl font-bold text-blue-600 tracking-wide">INNOVA UTEM</p>
+          
+          <div className="text-center mt-4">
+            <p className="text-xs font-bold text-gray-400 tracking-widest">INNOVA UTEM</p>
           </div>
         </div>
       </aside>
@@ -89,20 +122,25 @@ export default function DashboardLayout({
 
       </div>
 
-      
       {isMobileMenuOpen && (
         <div 
           className="fixed inset-0 z-50 bg-black/50 md:hidden"
           onClick={() => setIsMobileMenuOpen(false)}
         >
           <div className="absolute top-16 right-4 w-56 bg-white rounded-lg shadow-xl border border-gray-200 p-2 flex flex-col gap-1">
+            
+            <div className="px-3 py-2 mb-1 border-b border-gray-100">
+              <p className="text-sm font-bold text-gray-800 truncate">{nombreUsuario}</p>
+              <p className="text-xs text-blue-600">{rolUsuario}</p>
+            </div>
+
             {menuItems.map((item) => {
               const Icon = item.icon;
               return (
                 <Link
                   key={item.name}
                   href={item.href}
-                  className="flex items-center gap-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
+                  className="flex items-center gap-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md text-sm"
                 >
                   <Icon size={18} />
                   {item.name}
@@ -112,7 +150,7 @@ export default function DashboardLayout({
             <hr className="my-1 border-gray-200" />
             <button 
               onClick={handleLogout}
-              className="flex items-center gap-3 px-3 py-2 text-red-600 hover:bg-red-50 rounded-md text-left w-full"
+              className="flex items-center gap-3 px-3 py-2 text-red-600 hover:bg-red-50 rounded-md text-left w-full text-sm"
             >
               <LogOut size={18} />
               Cerrar Sesión

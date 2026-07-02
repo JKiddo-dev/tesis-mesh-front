@@ -26,7 +26,12 @@ export default function MensajesPage() {
   useEffect(() => {
     const cargarHistorial = async () => {
       try {
-        const respuesta = await fetch('http://localhost:4000/telemetry/messages');
+        const token = localStorage.getItem('mesh_token');
+        const respuesta = await fetch('http://localhost:4000/telemetry/messages',{
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
         if (respuesta.ok) {
           const historial = await respuesta.json();
           
@@ -120,8 +125,12 @@ export default function MensajesPage() {
     if (!window.confirm(`¿Estás seguro de que deseas eliminar el nodo ${nodoId}?`)) return;
 
     try {
+      const token = localStorage.getItem('mesh_token');
       const respuesta = await fetch(`http://localhost:4000/telemetry/nodes/${nodoId}`, {
         method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
       if (respuesta.ok) {
         setMensajes((prev) => prev.filter(m => String(m.nodoOrigen) !== String(nodoId)));
@@ -139,10 +148,12 @@ export default function MensajesPage() {
 
     setEnviando(true);
     try {
+      const token = localStorage.getItem('mesh_token');
       const respuesta = await fetch('http://localhost:4000/telemetry/send', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           mensaje: mensajeAEnviar
@@ -178,7 +189,6 @@ export default function MensajesPage() {
       </div>
 
       <div className="flex-1 flex flex-col md:flex-row gap-4 min-h-[500px]">
-        {/* PANEL LATERAL DE NODOS */}
         <div className="w-full md:w-80 bg-white rounded-xl shadow-sm border border-gray-200 p-4 shrink-0 flex flex-col gap-4">
           <div className="flex items-center gap-2 text-gray-800 font-semibold border-b border-gray-100 pb-2">
             <Filter size={18} /> Filtros de Nodos

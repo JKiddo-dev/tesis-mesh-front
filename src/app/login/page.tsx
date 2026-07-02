@@ -6,15 +6,41 @@ import { useRouter } from 'next/navigation';
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  
+  const [error, setError] = useState('');
+  const [cargando, setCargando] = useState(false);
+  
   const router = useRouter();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email === 'admin@utem.cl' && password === 'admin123') {
-      alert('¡Login Exitoso! Simulando recepción de JWT...');
-      router.push('/dashboard'); 
-    } else {
-      alert('Credenciales incorrectas');
+    setError(''); 
+    setCargando(true); 
+
+    try {
+      const respuesta = await fetch('http://localhost:4000/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (respuesta.ok) {
+        const data = await respuesta.json();
+        
+        localStorage.setItem('mesh_token', data.access_token);
+        localStorage.setItem('mesh_user', JSON.stringify(data.user));
+        
+        router.push('/dashboard'); 
+      } else {
+        setError('Correo o contraseña incorrectos');
+      }
+    } catch (err) {
+      console.error(err);
+      setError('No se pudo conectar con el servidor');
+    } finally {
+      setCargando(false);
     }
   };
 
@@ -34,8 +60,9 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="mt-1 block w-full px-4 py-2 border text-black border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-              placeholder="admin@utem.cl"
+              placeholder="tu@correo.cl"
               required
+              disabled={cargando}
             />
           </div>
 
@@ -48,14 +75,22 @@ export default function LoginPage() {
               className="mt-1 block w-full px-4 py-2 border text-black border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
               placeholder="••••••••"
               required
+              disabled={cargando}
             />
           </div>
 
+          {error && (
+            <div className="text-red-500 text-sm text-center font-medium bg-red-50 p-2 rounded">
+              {error}
+            </div>
+          )}
+
           <button
             type="submit"
-            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            disabled={cargando}
+            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
-            Iniciar Sesión
+            {cargando ? 'Verificando...' : 'Iniciar Sesión'}
           </button>
         </form>
       </div>

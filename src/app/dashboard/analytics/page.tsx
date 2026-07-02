@@ -35,7 +35,12 @@ export default function AnalyticsPage() {
   useEffect(() => {
     const cargarAnaliticas = async () => {
       try {
-        const respuesta = await fetch('http://localhost:4000/telemetry/analytics');
+        const token = localStorage.getItem('mesh_token');
+        const respuesta = await fetch('http://localhost:4000/telemetry/analytics', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
         if (respuesta.ok) {
           const data = await respuesta.json();
           setDatosGraficos(data);

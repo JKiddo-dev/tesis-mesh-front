@@ -27,7 +27,12 @@ export default function TrackeoPage() {
   useEffect(() => {
     const cargarNodos = async () => {
       try {
-        const respuesta = await fetch('http://localhost:4000/telemetry/nodes');
+        const token = localStorage.getItem('mesh_token');
+        const respuesta = await fetch('http://localhost:4000/telemetry/nodes', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
         if (respuesta.ok) {
           const nodos = await respuesta.json();
           setNodosDisponibles(nodos);
@@ -50,7 +55,12 @@ export default function TrackeoPage() {
 
     setCargando(true);
     try {
-      const respuesta = await fetch('http://localhost:4000/telemetry/history');
+      const token = localStorage.getItem('mesh_token');
+      const respuesta = await fetch('http://localhost:4000/telemetry/history', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       if (!respuesta.ok) throw new Error('Error al obtener datos');
       
       const historial = await respuesta.json();
