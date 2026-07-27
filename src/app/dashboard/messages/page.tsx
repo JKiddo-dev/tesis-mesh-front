@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { 
   Terminal, Activity, Clock, Filter, Trash2, Send, 
   AlertTriangle, Flame, AlertCircle, MessageSquare, 
-  MapPin, Radio 
+  MapPin, Radio, SlidersHorizontal 
 } from 'lucide-react';
 import { io } from 'socket.io-client';
 
@@ -22,6 +22,7 @@ export default function MensajesPage() {
   const [filtroNodo, setFiltroNodo] = useState<string>('Todos');
   const [filtroTipo, setFiltroTipo] = useState<string>('TODOS');
   const [conexionSocket, setConexionSocket] = useState(false);
+  const [mostrarFiltrosMobile, setMostrarFiltrosMobile] = useState(false);
   
   const [mensajeAEnviar, setMensajeAEnviar] = useState('');
   const [enviando, setEnviando] = useState(false);
@@ -201,11 +202,24 @@ export default function MensajesPage() {
             </button>
           ))}
         </div>
+
+        <div className="flex justify-between items-center gap-2 md:hidden">
+          <button
+            type="button"
+            onClick={() => setMostrarFiltrosMobile(!mostrarFiltrosMobile)}
+            className="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-semibold text-gray-700 shadow-xs hover:bg-gray-50 transition-colors"
+          >
+            <SlidersHorizontal size={14} className="text-blue-600" />
+            {mostrarFiltrosMobile ? 'Ocultar Filtros de Nodos' : 'Filtrar por Nodos'}
+          </button>
+          <span className="text-xs text-gray-500 font-mono">
+            Nodo: {filtroNodo}
+          </span>
+        </div>
       </div>
 
       <div className="flex-1 flex flex-col md:flex-row gap-4 min-h-[500px]">
-        {/* SIDEBAR NODOS */}
-        <div className="w-full md:w-80 bg-white rounded-xl shadow-sm border border-gray-200 p-4 shrink-0 flex flex-col gap-4">
+        <div className={`w-full md:w-80 bg-white rounded-xl shadow-sm border border-gray-200 p-4 shrink-0 flex-col gap-4 ${mostrarFiltrosMobile ? 'flex' : 'hidden md:flex'}`}>
           <div className="flex items-center gap-2 text-gray-800 font-semibold border-b border-gray-100 pb-2">
             <Filter size={18} /> Filtros de Nodos
           </div>
