@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Map, Users, Route, MessageSquare, LogOut, Menu, Activity, UserCircle } from 'lucide-react';
+import { Map, Users, Route, MessageSquare, LogOut, Menu, Activity, UserCircle, Settings } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 export default function DashboardLayout({
@@ -43,6 +43,7 @@ export default function DashboardLayout({
     { name: 'Historial de Trackeo', href: '/dashboard/tracking', icon: Route },
     { name: 'Mensajes Mesh', href: '/dashboard/messages', icon: MessageSquare },
     { name: 'Analítica y Métricas', href: '/dashboard/analytics', icon: Activity },
+    { name: 'Configuraciones', href: '/dashboard/settings', icon: Settings },
   ];
 
   const handleLogout = () => {

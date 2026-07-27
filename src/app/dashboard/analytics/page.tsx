@@ -87,16 +87,24 @@ export default function AnalyticsPage() {
             Mide la fuerza de la señal recibida por nodo. Valores más cercanos a 0 son mejores (Ej: -40dBm es excelente, -120dBm es crítica).
           </p>
           <div className="flex-1 min-h-[300px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={datosGraficos.rssiPorNodo} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                <XAxis dataKey="nodo" tick={{fontSize: 12}} />
-                <YAxis label={{ value: 'dBm', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle' } }} />
-                <Tooltip cursor={{fill: '#f1f5f9'}} />
-                <Legend />
-                <Bar dataKey="rssi" name="Promedio RSSI (dBm)" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            {datosGraficos.rssiPorNodo.length === 0 ? (
+              <div className="flex items-center justify-center h-full text-slate-400 text-sm italic bg-slate-50 rounded-lg border border-dashed border-slate-200">
+                Aún no hay datos de RSSI registrados...
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={datosGraficos.rssiPorNodo} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                  <XAxis dataKey="nodo" tick={{fontSize: 12}} />
+                  {/* El dominio auto ajusta los números negativos, y dataMin asegura que la barra más baja no choque con el fondo */}
+                  <YAxis domain={['dataMin - 10', 0]} tick={{fontSize: 12}} label={{ value: 'dBm', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle' }, offset: -5 }} />
+                  <Tooltip cursor={{fill: '#f1f5f9'}} />
+                  <Legend />
+                  {/* Se eliminó el radius para evitar bugs visuales con valores negativos */}
+                  <Bar dataKey="rssi" name="Promedio RSSI (dBm)" fill="#3b82f6" />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </div>
 
