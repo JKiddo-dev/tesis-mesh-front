@@ -3,7 +3,9 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Map, Users, Route, MessageSquare, LogOut, Menu, Activity, UserCircle, Settings } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { io } from 'socket.io-client';
+import NotificationToast, { AlertaNotificacion } from '@/components/NotificationToast';
 
 export default function DashboardLayout({
   children,
@@ -16,6 +18,39 @@ export default function DashboardLayout({
   
   const [nombreUsuario, setNombreUsuario] = useState('');
   const [rolUsuario, setRolUsuario] = useState('');
+  const [notificacionActiva, setNotificacionActiva] = useState<AlertaNotificacion | null>(null);
+
+  useEffect(() => {
+    const socket = io('http://localhost:4000');
+
+    socket.on('nuevoMensajeMesh', (data) => {
+      const payloadObj = data?.payload;
+      if (!payloadObj) return;
+
+      const textoPayload = payloadObj.mensajeTexto || payloadObj.metadatos?.payload || '';
+      const esEmergencia = /EMERGENCIA:/i.test(textoPayload);
+      const esAlerta = /ALERTA:/i.test(textoPayload);
+      const esPrecaucion = /PRECAUCIÓN:/i.test(textoPayload);
+
+      if (esEmergencia || esAlerta || esPrecaucion) {
+        setNotificacionActiva({
+          id: payloadObj._id || Math.random().toString(36).substring(7),
+          nodoOrigen: payloadObj.nodoId || 'Desconocido',
+          payload: textoPayload,
+          tipo: payloadObj.tipoPaquete || 'TEXTO',
+          timestamp: new Date()
+        });
+      }
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
+
+  const handleCerrarNotificacion = useCallback(() => {
+    setNotificacionActiva(null);
+  }, []);
 
   useEffect(() => {
     const token = localStorage.getItem('mesh_token');
@@ -159,6 +194,11 @@ export default function DashboardLayout({
           </div>
         </div>
       )}
+
+      <NotificationToast 
+        notificacion={notificacionActiva} 
+        onCerrar={handleCerrarNotificacion} 
+      />
 
     </div>
   );

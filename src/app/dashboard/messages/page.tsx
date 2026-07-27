@@ -28,11 +28,10 @@ export default function MensajesPage() {
   
   const mensajesEndRef = useRef<HTMLDivElement>(null);
 
-  // Botones de acción para enviar alertas (NO son filtros)
   const alertasRapidas = [
-    { texto: "EMERGENCIA: Accidente o problema médico detectado.", icono: <AlertTriangle size={16} />, clase: "bg-red-900/40 text-red-400 hover:bg-red-900/60 border-red-800" },
-    { texto: "ALERTA: Posible foco de incendio avistado.", icono: <Flame size={16} />, clase: "bg-orange-900/40 text-orange-400 hover:bg-orange-900/60 border-orange-800" },
-    { texto: "PRECAUCIÓN: Camino bloqueado o escombros en la ruta.", icono: <AlertCircle size={16} />, clase: "bg-yellow-900/40 text-yellow-400 hover:bg-yellow-900/60 border-yellow-800" }
+    { texto: "EMERGENCIA: Accidente o problema médico detectado.", icono: <AlertTriangle size={16} />, clase: "bg-red-600 text-white hover:bg-red-700 border-red-700 font-semibold shadow-xs" },
+    { texto: "ALERTA: Posible foco de incendio avistado.", icono: <Flame size={16} />, clase: "bg-orange-600 text-white hover:bg-orange-700 border-orange-700 font-semibold shadow-xs" },
+    { texto: "PRECAUCIÓN: Camino bloqueado o escombros en la ruta.", icono: <AlertCircle size={16} />, clase: "bg-amber-500 text-slate-950 hover:bg-amber-600 border-amber-600 font-semibold shadow-xs" }
   ];
 
   const formatearDocumento = (doc: any): MensajeMesh => {
@@ -163,7 +162,6 @@ export default function MensajesPage() {
 
   const nodosUnicos = Array.from(new Set(mensajes.map(m => String(m.nodoOrigen))));
   
-  // --- NUEVA LÓGICA DE FILTRADO ---
   const mensajesFiltrados = mensajes.filter(m => {
     const cumpleFiltroNodo = filtroNodo === 'Todos' || String(m.nodoOrigen) === String(filtroNodo);
     
@@ -171,7 +169,6 @@ export default function MensajesPage() {
     if (filtroTipo === 'TODOS') {
       cumpleFiltroTipo = true;
     } else if (filtroTipo === 'ALERTAS') {
-      // Verifica si es texto Y contiene alguna de las palabras clave de alerta (ignorando mayúsculas/minúsculas)
       const esTexto = m.tipo === 'TEXTO';
       const contieneAlerta = /EMERGENCIA:|ALERTA:|PRECAUCIÓN:/i.test(m.payload);
       cumpleFiltroTipo = esTexto && contieneAlerta;
@@ -272,7 +269,6 @@ export default function MensajesPage() {
               {[
                 { id: 'TODOS', label: 'Todo', icon: <Filter size={14} /> },
                 { id: 'TEXTO', label: 'Mensajes', icon: <MessageSquare size={14} /> },
-                // NUEVA PESTAÑA DE ALERTAS
                 { id: 'ALERTAS', label: 'Alertas', icon: <AlertTriangle size={14} /> },
                 { id: 'POSICION', label: 'GPS', icon: <MapPin size={14} /> },
                 { id: 'TELEMETRIA', label: 'Telemetría', icon: <Radio size={14} /> }
@@ -301,12 +297,10 @@ export default function MensajesPage() {
               mensajesFiltrados.map((msg) => {
                 const esMensajeWeb = String(msg.nodoOrigen) === '1234567890';
                 
-                // Expresiones regulares para identificar el tipo de alerta
                 const esEmergencia = /EMERGENCIA:/i.test(msg.payload);
                 const esAlerta = /ALERTA:/i.test(msg.payload);
                 const esPrecaucion = /PRECAUCIÓN:/i.test(msg.payload);
                 
-                // Variables dinámicas para el estilado
                 let clasesBase = 'p-3 rounded border transition-colors ';
                 let colorTitulo = 'text-blue-400';
                 let colorTexto = 'text-green-400';
@@ -332,7 +326,6 @@ export default function MensajesPage() {
                   colorTexto = 'text-yellow-200 font-semibold';
                   etiquetaTipo = 'PRECAUCIÓN';
                 } else {
-                  // Estilo por defecto (paquetes normales)
                   clasesBase += 'bg-slate-800/50 border-slate-700/50 hover:border-slate-600';
                 }
 

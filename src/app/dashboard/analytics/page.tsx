@@ -96,11 +96,9 @@ export default function AnalyticsPage() {
                 <BarChart data={datosGraficos.rssiPorNodo} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
                   <XAxis dataKey="nodo" tick={{fontSize: 12}} />
-                  {/* El dominio auto ajusta los números negativos, y dataMin asegura que la barra más baja no choque con el fondo */}
                   <YAxis domain={['dataMin - 10', 0]} tick={{fontSize: 12}} label={{ value: 'dBm', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle' }, offset: -5 }} />
                   <Tooltip cursor={{fill: '#f1f5f9'}} />
                   <Legend />
-                  {/* Se eliminó el radius para evitar bugs visuales con valores negativos */}
                   <Bar dataKey="rssi" name="Promedio RSSI (dBm)" fill="#3b82f6" />
                 </BarChart>
               </ResponsiveContainer>

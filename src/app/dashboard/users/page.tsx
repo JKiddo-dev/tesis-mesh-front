@@ -119,12 +119,12 @@ export default function UsuariosPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Gestión de Usuarios</h1>
           <p className="text-gray-500 text-sm mt-1">Administra el acceso a la plataforma Mesh</p>
         </div>
-        <button onClick={() => setMostrarModal(true)} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium transition-colors shadow-sm">
+        <button onClick={() => setMostrarModal(true)} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 text-sm font-medium transition-colors shadow-sm shrink-0">
           <UserPlus size={18} />
           Nuevo Usuario
         </button>

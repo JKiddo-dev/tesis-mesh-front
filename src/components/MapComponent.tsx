@@ -14,7 +14,6 @@ const customIcon = new L.Icon({
   shadowSize: [41, 41]
 });
 
-// Componente "mágico" para forzar a Leaflet a moverse cuando llegan los datos asíncronos
 function ChangeView({ center, zoom }: { center: [number, number]; zoom: number }) {
   const map = useMap();
   map.setView(center, zoom);
@@ -28,14 +27,12 @@ interface NodoMap {
   ultimaActualizacion: Date;
 }
 
-// 1. Enseñamos a TypeScript que ahora podemos recibir 'centro' y 'zoom'
 interface MapComponentProps {
   nodosActivos: NodoMap[];
   centro?: [number, number];
   zoom?: number;
 }
 
-// 2. Extraemos centro y zoom, asignando un valor por defecto seguro
 export default function MapComponent({ 
   nodosActivos,
   centro = [-33.4660619, -70.5980495], 
@@ -48,7 +45,6 @@ export default function MapComponent({
       zoom={zoom} 
       className="w-full h-full rounded-xl z-0"
     >
-      {/* 3. Inyectamos nuestro actualizador de vista */}
       <ChangeView center={centro} zoom={zoom} />
 
       <TileLayer
