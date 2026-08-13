@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Map, Users, Route, MessageSquare, LogOut, Menu, Activity, UserCircle, Settings } from 'lucide-react';
+import { Map, Users, Route, MessageSquare, LogOut, Menu, Activity, UserCircle, Settings, Radio } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
 import { io } from 'socket.io-client';
 import NotificationToast, { AlertaNotificacion } from '@/components/NotificationToast';
@@ -18,6 +18,7 @@ export default function DashboardLayout({
   
   const [nombreUsuario, setNombreUsuario] = useState('');
   const [rolUsuario, setRolUsuario] = useState('');
+  const [nodoUsuario, setNodoUsuario] = useState<string | null>(null);
   const [notificacionActiva, setNotificacionActiva] = useState<AlertaNotificacion | null>(null);
 
   useEffect(() => {
@@ -66,25 +67,34 @@ export default function DashboardLayout({
         const user = JSON.parse(userStr);
         setNombreUsuario(user.nombre);
         setRolUsuario(user.rol);
+        setNodoUsuario(user.nodoId || null);
       } catch (error) {
         console.error('Error leyendo los datos del usuario');
       }
     }
   }, [router]);
 
-  const menuItems = [
-    { name: 'Ubicación (Mapa)', href: '/dashboard', icon: Map },
-    { name: 'Gestión de Usuarios', href: '/dashboard/users', icon: Users },
-    { name: 'Historial de Trackeo', href: '/dashboard/tracking', icon: Route },
-    { name: 'Mensajes Mesh', href: '/dashboard/messages', icon: MessageSquare },
-    { name: 'Analítica y Métricas', href: '/dashboard/analytics', icon: Activity },
-    { name: 'Configuraciones', href: '/dashboard/settings', icon: Settings },
+  const allMenuItems = [
+    { name: 'Ubicación (Mapa)', href: '/dashboard', icon: Map, roles: ['Admin', 'Operador', 'Usuario'] },
+    { name: 'Gestión de Usuarios', href: '/dashboard/users', icon: Users, roles: ['Admin', 'Operador'] },
+    { name: 'Historial de Trackeo', href: '/dashboard/tracking', icon: Route, roles: ['Admin', 'Operador', 'Usuario'] },
+    { name: 'Mensajes Mesh', href: '/dashboard/messages', icon: MessageSquare, roles: ['Admin', 'Operador', 'Usuario'] },
+    { name: 'Analítica y Métricas', href: '/dashboard/analytics', icon: Activity, roles: ['Admin', 'Operador'] },
+    { name: 'Configuraciones', href: '/dashboard/settings', icon: Settings, roles: ['Admin'] },
   ];
+
+  const menuItems = allMenuItems.filter(item => !rolUsuario || item.roles.includes(rolUsuario));
 
   const handleLogout = () => {
     localStorage.removeItem('mesh_token');
     localStorage.removeItem('mesh_user');
     router.push('/login');
+  };
+
+  const getRoleBadgeClass = (rol: string) => {
+    if (rol === 'Admin') return 'bg-purple-100 text-purple-700 border border-purple-200';
+    if (rol === 'Operador') return 'bg-blue-100 text-blue-700 border border-blue-200';
+    return 'bg-emerald-100 text-emerald-700 border border-emerald-200';
   };
 
   return (
@@ -118,11 +128,21 @@ export default function DashboardLayout({
         </nav>
 
         <div className="p-4 border-t border-gray-200 bg-gray-50">
-          <div className="flex items-center gap-3 px-3 mb-4">
-            <UserCircle size={32} className="text-gray-400" />
-            <div className="overflow-hidden">
+          <div className="flex items-start gap-3 px-2 mb-3">
+            <UserCircle size={32} className="text-gray-400 shrink-0 mt-0.5" />
+            <div className="overflow-hidden flex-1">
               <p className="text-sm font-bold text-gray-800 truncate">{nombreUsuario || 'Cargando...'}</p>
-              <p className="text-xs font-medium text-blue-600">{rolUsuario}</p>
+              <div className="flex items-center gap-1 mt-0.5">
+                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase ${getRoleBadgeClass(rolUsuario)}`}>
+                  {rolUsuario || 'Usuario'}
+                </span>
+              </div>
+              {nodoUsuario && (
+                <div className="flex items-center gap-1 text-[11px] font-mono text-gray-600 mt-1 bg-gray-200/70 px-1.5 py-0.5 rounded truncate">
+                  <Radio size={12} className="text-blue-600 shrink-0" />
+                  <span className="truncate">Radio: {nodoUsuario}</span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -163,11 +183,21 @@ export default function DashboardLayout({
           className="fixed inset-0 z-50 bg-black/50 md:hidden"
           onClick={() => setIsMobileMenuOpen(false)}
         >
-          <div className="absolute top-16 right-4 w-56 bg-white rounded-lg shadow-xl border border-gray-200 p-2 flex flex-col gap-1">
+          <div className="absolute top-16 right-4 w-60 bg-white rounded-lg shadow-xl border border-gray-200 p-3 flex flex-col gap-1">
             
             <div className="px-3 py-2 mb-1 border-b border-gray-100">
               <p className="text-sm font-bold text-gray-800 truncate">{nombreUsuario}</p>
-              <p className="text-xs text-blue-600">{rolUsuario}</p>
+              <div className="flex items-center gap-1 mt-1">
+                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase ${getRoleBadgeClass(rolUsuario)}`}>
+                  {rolUsuario}
+                </span>
+              </div>
+              {nodoUsuario && (
+                <div className="flex items-center gap-1 text-xs font-mono text-gray-600 mt-1">
+                  <Radio size={12} className="text-blue-600 shrink-0" />
+                  <span>Radio: {nodoUsuario}</span>
+                </div>
+              )}
             </div>
 
             {menuItems.map((item) => {

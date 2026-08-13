@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Activity, BarChart3, Signal } from 'lucide-react';
+import { Activity, BarChart3, Signal, ShieldAlert } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   PieChart, Pie
@@ -26,13 +27,27 @@ interface DatosAnaliticas {
 }
 
 export default function AnalyticsPage() {
+  const router = useRouter();
   const [datosGraficos, setDatosGraficos] = useState<DatosAnaliticas>({
     conteoPaquetes: [],
     rssiPorNodo: []
   });
   const [cargando, setCargando] = useState(true);
+  const [accesoDenegado, setAccesoDenegado] = useState(false);
 
   useEffect(() => {
+    const userStr = localStorage.getItem('mesh_user');
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        if (user.rol === 'Usuario') {
+          setAccesoDenegado(true);
+          setCargando(false);
+          return;
+        }
+      } catch (e) {}
+    }
+
     const cargarAnaliticas = async () => {
       try {
         const token = localStorage.getItem('mesh_token');
@@ -44,6 +59,8 @@ export default function AnalyticsPage() {
         if (respuesta.ok) {
           const data = await respuesta.json();
           setDatosGraficos(data);
+        } else if (respuesta.status === 403) {
+          setAccesoDenegado(true);
         }
       } catch (error) {
         console.error('Error cargando analíticas:', error);
@@ -56,6 +73,26 @@ export default function AnalyticsPage() {
     const intervalo = setInterval(cargarAnaliticas, 10000);
     return () => clearInterval(intervalo);
   }, []);
+
+  if (accesoDenegado) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
+        <div className="p-4 bg-amber-50 rounded-full text-amber-500 mb-4">
+          <ShieldAlert size={48} />
+        </div>
+        <h2 className="text-xl font-bold text-gray-800 mb-2">Módulo de Analítica y Métricas</h2>
+        <p className="text-gray-500 max-w-md mb-6">
+          Las métricas de rendimiento y estadísticas de red están reservadas para los roles de <strong className="text-gray-700">Administrador</strong> y <strong className="text-gray-700">Operador</strong>.
+        </p>
+        <button
+          onClick={() => router.push('/dashboard')}
+          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+        >
+          Ir a Mensajes y Mapa
+        </button>
+      </div>
+    );
+  }
 
   if (cargando) {
     return <div className="flex h-full items-center justify-center text-slate-500">Cargando métricas de la red Mesh...</div>;
@@ -70,8 +107,8 @@ export default function AnalyticsPage() {
     <div className="flex flex-col gap-6 h-full overflow-y-auto pb-10 scrollbar-thin scrollbar-thumb-gray-300">
       <div className="flex justify-between items-center shrink-0">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Métricas y Analíticas</h1>
-          <p className="text-gray-500 text-sm mt-1">Análisis de rendimiento de la red LORA en tiempo real</p>
+          <h1 className="text-2xl font-bold text-gray-800">Métricas y Analíticas de Red</h1>
+          <p className="text-gray-500 text-sm mt-1">Análisis de rendimiento y calidad de enlace LoRa en tiempo real (Operadores y Admin)</p>
         </div>
       </div>
 

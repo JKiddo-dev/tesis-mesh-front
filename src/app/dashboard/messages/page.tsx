@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { 
   Terminal, Activity, Clock, Filter, Trash2, Send, 
   AlertTriangle, Flame, AlertCircle, MessageSquare, 
-  MapPin, Radio, SlidersHorizontal 
+  MapPin, Radio, SlidersHorizontal, User 
 } from 'lucide-react';
 import { io } from 'socket.io-client';
 
@@ -17,12 +17,22 @@ interface MensajeMesh {
   tipo: string;
 }
 
+interface UsuarioMesh {
+  _id: string;
+  nombre: string;
+  email: string;
+  rol: string;
+  nodoId?: string | null;
+}
+
 export default function MensajesPage() {
   const [mensajes, setMensajes] = useState<MensajeMesh[]>([]);
+  const [usuarios, setUsuarios] = useState<UsuarioMesh[]>([]);
   const [filtroNodo, setFiltroNodo] = useState<string>('Todos');
   const [filtroTipo, setFiltroTipo] = useState<string>('TODOS');
   const [conexionSocket, setConexionSocket] = useState(false);
   const [mostrarFiltrosMobile, setMostrarFiltrosMobile] = useState(false);
+  const [rolActual, setRolActual] = useState<string>('');
   
   const [mensajeAEnviar, setMensajeAEnviar] = useState('');
   const [enviando, setEnviando] = useState(false);
@@ -63,6 +73,29 @@ export default function MensajesPage() {
   };
 
   useEffect(() => {
+    const userStr = localStorage.getItem('mesh_user');
+    if (userStr) {
+      try {
+        const u = JSON.parse(userStr);
+        setRolActual(u.rol);
+      } catch (e) {}
+    }
+
+    const cargarUsuarios = async () => {
+      try {
+        const token = localStorage.getItem('mesh_token');
+        const res = await fetch('http://localhost:4000/auth/users', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setUsuarios(data);
+        }
+      } catch (error) {
+        console.error('Error cargando lista de usuarios', error);
+      }
+    };
+
     const cargarHistorial = async () => {
       try {
         const token = localStorage.getItem('mesh_token');
@@ -81,6 +114,7 @@ export default function MensajesPage() {
       }
     };
 
+    cargarUsuarios();
     cargarHistorial();
   }, []);
 
@@ -161,6 +195,10 @@ export default function MensajesPage() {
     ejecutarEnvioMensaje(mensajeAEnviar);
   };
 
+  const obtenerUsuarioPorNodo = (nodoId: string): UsuarioMesh | undefined => {
+    return usuarios.find(u => u.nodoId && String(u.nodoId).trim().toLowerCase() === String(nodoId).trim().toLowerCase());
+  };
+
   const nodosUnicos = Array.from(new Set(mensajes.map(m => String(m.nodoOrigen))));
   
   const mensajesFiltrados = mensajes.filter(m => {
@@ -185,7 +223,7 @@ export default function MensajesPage() {
       <div className="flex flex-col md:flex-row md:justify-between md:items-center shrink-0 gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Tráfico de Red Mesh</h1>
-          <p className="text-gray-500 text-sm mt-1">Monitor de paquetes MQTT bidireccional</p>
+          <p className="text-gray-500 text-sm mt-1">Monitor de paquetes MQTT bidireccional y usuarios vinculados</p>
         </div>
         
         <div className="flex gap-2 flex-wrap">
@@ -221,7 +259,7 @@ export default function MensajesPage() {
       <div className="flex-1 flex flex-col md:flex-row gap-4 min-h-[500px]">
         <div className={`w-full md:w-80 bg-white rounded-xl shadow-sm border border-gray-200 p-4 shrink-0 flex-col gap-4 ${mostrarFiltrosMobile ? 'flex' : 'hidden md:flex'}`}>
           <div className="flex items-center gap-2 text-gray-800 font-semibold border-b border-gray-100 pb-2">
-            <Filter size={18} /> Filtros de Nodos
+            <Filter size={18} /> Filtros de Nodos / Usuarios
           </div>
           
           <div className="space-y-2 overflow-y-auto max-h-80 scrollbar-thin scrollbar-thumb-gray-300 pr-1">
@@ -232,30 +270,42 @@ export default function MensajesPage() {
               Todos los Nodos
             </button>
             
-            {nodosUnicos.map((nodoId) => (
-              <div 
-                key={nodoId}
-                className={`flex items-center justify-between w-full rounded-lg text-sm transition-colors border border-transparent ${filtroNodo === nodoId ? 'bg-blue-50 border-blue-200 text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-50 hover:border-gray-200'}`}
-              >
-                <button 
-                  onClick={() => setFiltroNodo(nodoId)} 
-                  className="flex-1 flex items-center gap-2 text-left px-3 py-2 truncate"
+            {nodosUnicos.map((nodoId) => {
+              const usuarioAsignado = obtenerUsuarioPorNodo(nodoId);
+              const esCentroComando = nodoId === '1234567890';
+              
+              return (
+                <div 
+                  key={nodoId}
+                  className={`flex items-center justify-between w-full rounded-lg text-sm transition-colors border border-transparent ${filtroNodo === nodoId ? 'bg-blue-50 border-blue-200 text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-50 hover:border-gray-200'}`}
                 >
-                  <span className={`w-2 h-2 rounded-full shrink-0 ${nodoId === '1234567890' ? 'bg-purple-500' : 'bg-green-500'}`}></span>
-                  <span className="truncate">
-                    {nodoId === '1234567890' ? 'Centro de Comando' : `Nodo: ${nodoId}`}
-                  </span>
-                </button>
-                
-                <button
-                  onClick={(e) => handleEliminarNodo(nodoId, e)}
-                  title="Eliminar nodo"
-                  className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-r-lg transition-colors shrink-0"
-                >
-                  <Trash2 size={16} />
-                </button>
-              </div>
-            ))}
+                  <button 
+                    onClick={() => setFiltroNodo(nodoId)} 
+                    className="flex-1 flex items-center gap-2 text-left px-3 py-2 truncate"
+                  >
+                    <span className={`w-2 h-2 rounded-full shrink-0 ${esCentroComando ? 'bg-purple-500' : 'bg-green-500'}`}></span>
+                    <div className="truncate flex flex-col items-start text-xs">
+                      <span className="font-semibold truncate">
+                        {esCentroComando ? 'Centro de Comando' : (usuarioAsignado ? usuarioAsignado.nombre : `Nodo: ${nodoId}`)}
+                      </span>
+                      {usuarioAsignado && (
+                        <span className="text-[11px] text-gray-400 font-mono">Nodo: {nodoId}</span>
+                      )}
+                    </div>
+                  </button>
+                  
+                  {rolActual !== 'Usuario' && (
+                    <button
+                      onClick={(e) => handleEliminarNodo(nodoId, e)}
+                      title="Eliminar nodo"
+                      className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-r-lg transition-colors shrink-0"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  )}
+                </div>
+              );
+            })}
           </div>
 
           <div className="mt-auto bg-gray-50 p-3 rounded-lg border border-gray-100">
@@ -276,7 +326,7 @@ export default function MensajesPage() {
           <div className="bg-slate-800 flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-700">
             <div className="flex items-center gap-2 text-slate-300 px-4 py-3 sm:py-2">
               <Terminal size={16} />
-              <span>Log de Tráfico</span>
+              <span>Log de Tráfico Mesh</span>
             </div>
             
             <div className="flex bg-slate-800 w-full sm:w-auto overflow-x-auto">
@@ -310,6 +360,7 @@ export default function MensajesPage() {
             ) : (
               mensajesFiltrados.map((msg) => {
                 const esMensajeWeb = String(msg.nodoOrigen) === '1234567890';
+                const usuarioAsignado = obtenerUsuarioPorNodo(msg.nodoOrigen);
                 
                 const esEmergencia = /EMERGENCIA:/i.test(msg.payload);
                 const esAlerta = /ALERTA:/i.test(msg.payload);
@@ -346,10 +397,24 @@ export default function MensajesPage() {
                 return (
                   <div key={msg.id} className={clasesBase}>
                     <div className="flex justify-between items-start mb-2">
-                      <div className="flex items-center gap-2">
-                        <span className={`font-bold ${colorTitulo}`}>
-                          {esMensajeWeb ? 'PLATAFORMA WEB' : msg.nodoOrigen}
-                        </span>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        {esMensajeWeb ? (
+                          <span className={`font-bold ${colorTitulo}`}>
+                            PLATAFORMA WEB
+                          </span>
+                        ) : usuarioAsignado ? (
+                          <span className="flex items-center gap-1.5">
+                            <span className="font-bold text-emerald-400 flex items-center gap-1">
+                              <User size={13} className="text-emerald-400" />
+                              {usuarioAsignado.nombre}
+                            </span>
+                            <span className="text-xs text-slate-400">({msg.nodoOrigen})</span>
+                          </span>
+                        ) : (
+                          <span className={`font-bold ${colorTitulo}`}>
+                            Nodo: {msg.nodoOrigen}
+                          </span>
+                        )}
                         <span className="text-xs text-slate-500">[{etiquetaTipo}]</span>
                       </div>
                       <div className="flex items-center gap-3 text-xs text-slate-400">

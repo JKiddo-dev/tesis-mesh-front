@@ -1,9 +1,12 @@
 "use client";
 import { useState, useEffect } from "react";
+import { ShieldAlert } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const API_URL = "http://localhost:4000"; 
 
 export default function SettingsPage() {
+  const router = useRouter();
   const [settings, setSettings] = useState({
     mqttBrokerUrl: "",
     mqttTopic: "",
@@ -16,9 +19,22 @@ export default function SettingsPage() {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [accesoDenegado, setAccesoDenegado] = useState(false);
   const [mensaje, setMensaje] = useState<{ texto: string; tipo: "exito" | "error" } | null>(null);
 
   useEffect(() => {
+    const userStr = localStorage.getItem('mesh_user');
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        if (user.rol !== 'Admin') {
+          setAccesoDenegado(true);
+          setLoading(false);
+          return;
+        }
+      } catch (e) {}
+    }
+
     const fetchSettings = async () => {
       try {
         const token = localStorage.getItem('mesh_token'); 
@@ -32,6 +48,8 @@ export default function SettingsPage() {
           if (data && data.mqttBrokerUrl) {
             setSettings(data);
           }
+        } else if (res.status === 403) {
+          setAccesoDenegado(true);
         }
       } catch (error) {
         console.error("Error cargando configuración:", error);
@@ -89,6 +107,26 @@ export default function SettingsPage() {
       setTimeout(() => setMensaje(null), 5000); 
     }
   };
+
+  if (accesoDenegado) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center mt-6 max-w-xl mx-auto">
+        <div className="p-4 bg-purple-50 rounded-full text-purple-600 mb-4">
+          <ShieldAlert size={48} />
+        </div>
+        <h2 className="text-xl font-bold text-gray-800 mb-2">Configuración Exclusiva de Administrador</h2>
+        <p className="text-gray-500 max-w-md mb-6">
+          Solo los usuarios con rol de <strong className="text-purple-700">Administrador</strong> tienen permisos para modificar los parámetros MQTT, retención y conexión base de la red.
+        </p>
+        <button
+          onClick={() => router.push('/dashboard')}
+          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+        >
+          Volver al Panel Principal
+        </button>
+      </div>
+    );
+  }
 
   if (loading) return <div className="p-6">Cargando configuraciones...</div>;
 
