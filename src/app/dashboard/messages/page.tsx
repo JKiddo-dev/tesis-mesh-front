@@ -17,17 +17,15 @@ interface MensajeMesh {
   tipo: string;
 }
 
-interface UsuarioMesh {
-  _id: string;
+interface UsuarioNodoDirectorio {
   nombre: string;
-  email: string;
-  rol: string;
-  nodoId?: string | null;
+  nodoId: string;
+  rol?: string;
 }
 
 export default function MensajesPage() {
   const [mensajes, setMensajes] = useState<MensajeMesh[]>([]);
-  const [usuarios, setUsuarios] = useState<UsuarioMesh[]>([]);
+  const [directorioNodos, setDirectorioNodos] = useState<UsuarioNodoDirectorio[]>([]);
   const [filtroNodo, setFiltroNodo] = useState<string>('Todos');
   const [filtroTipo, setFiltroTipo] = useState<string>('TODOS');
   const [conexionSocket, setConexionSocket] = useState(false);
@@ -81,18 +79,18 @@ export default function MensajesPage() {
       } catch (e) {}
     }
 
-    const cargarUsuarios = async () => {
+    const cargarDirectorioNodos = async () => {
       try {
         const token = localStorage.getItem('mesh_token');
-        const res = await fetch('http://localhost:4000/auth/users', {
+        const res = await fetch('http://localhost:4000/auth/node-directory', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (res.ok) {
           const data = await res.json();
-          setUsuarios(data);
+          setDirectorioNodos(data || []);
         }
       } catch (error) {
-        console.error('Error cargando lista de usuarios', error);
+        console.error('Error cargando directorio de radios/usuarios', error);
       }
     };
 
@@ -114,7 +112,7 @@ export default function MensajesPage() {
       }
     };
 
-    cargarUsuarios();
+    cargarDirectorioNodos();
     cargarHistorial();
   }, []);
 
@@ -195,8 +193,8 @@ export default function MensajesPage() {
     ejecutarEnvioMensaje(mensajeAEnviar);
   };
 
-  const obtenerUsuarioPorNodo = (nodoId: string): UsuarioMesh | undefined => {
-    return usuarios.find(u => u.nodoId && String(u.nodoId).trim().toLowerCase() === String(nodoId).trim().toLowerCase());
+  const obtenerUsuarioPorNodo = (nodoId: string): UsuarioNodoDirectorio | undefined => {
+    return directorioNodos.find(u => u.nodoId && String(u.nodoId).trim().toLowerCase() === String(nodoId).trim().toLowerCase());
   };
 
   const nodosUnicos = Array.from(new Set(mensajes.map(m => String(m.nodoOrigen))));
@@ -283,14 +281,14 @@ export default function MensajesPage() {
                     onClick={() => setFiltroNodo(nodoId)} 
                     className="flex-1 flex items-center gap-2 text-left px-3 py-2 truncate"
                   >
-                    <span className={`w-2 h-2 rounded-full shrink-0 ${esCentroComando ? 'bg-purple-500' : 'bg-green-500'}`}></span>
+                    <span className={`w-2 h-2 rounded-full shrink-0 ${esCentroComando ? 'bg-purple-500' : (usuarioAsignado ? 'bg-emerald-500' : 'bg-blue-500')}`}></span>
                     <div className="truncate flex flex-col items-start text-xs">
                       <span className="font-semibold truncate">
                         {esCentroComando ? 'Centro de Comando' : (usuarioAsignado ? usuarioAsignado.nombre : `Nodo: ${nodoId}`)}
                       </span>
-                      {usuarioAsignado && (
-                        <span className="text-[11px] text-gray-400 font-mono">Nodo: {nodoId}</span>
-                      )}
+                      <span className="text-[11px] text-gray-400 font-mono">
+                        {esCentroComando ? '1234567890' : `Nodo: ${nodoId}`}
+                      </span>
                     </div>
                   </button>
                   
@@ -403,12 +401,14 @@ export default function MensajesPage() {
                             PLATAFORMA WEB
                           </span>
                         ) : usuarioAsignado ? (
-                          <span className="flex items-center gap-1.5">
-                            <span className="font-bold text-emerald-400 flex items-center gap-1">
-                              <User size={13} className="text-emerald-400" />
+                          <span className="inline-flex items-center gap-1.5 bg-emerald-950/60 border border-emerald-700/40 px-2 py-0.5 rounded">
+                            <User size={12} className="text-emerald-400 shrink-0" />
+                            <span className="font-bold text-emerald-300 text-xs">
                               {usuarioAsignado.nombre}
                             </span>
-                            <span className="text-xs text-slate-400">({msg.nodoOrigen})</span>
+                            <span className="text-[11px] text-emerald-400/80 font-mono">
+                              ({msg.nodoOrigen})
+                            </span>
                           </span>
                         ) : (
                           <span className={`font-bold ${colorTitulo}`}>
@@ -441,13 +441,13 @@ export default function MensajesPage() {
               value={mensajeAEnviar}
               onChange={(e) => setMensajeAEnviar(e.target.value)}
               placeholder="Escribe un mensaje libre para transmitir a las radios..."
-              className="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-slate-200 focus:outline-none focus:border-blue-500 placeholder:text-slate-500 transition-colors"
+              className="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-slate-200 focus:outline-none focus:border-blue-500 placeholder:text-slate-500 transition-colors text-sm"
               disabled={enviando || !conexionSocket}
             />
             <button
               type="submit"
               disabled={enviando || !mensajeAEnviar.trim() || !conexionSocket}
-              className="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2 rounded-lg flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-sans font-medium"
+              className="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2 rounded-lg flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-sans font-medium text-sm"
             >
               <Send size={16} />
               <span className="hidden sm:inline">{enviando ? 'Enviando...' : 'Transmitir'}</span>
