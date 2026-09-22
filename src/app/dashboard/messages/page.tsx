@@ -181,7 +181,7 @@ export default function MensajesPage() {
   }, [nodoRemitente, nodoDestinatario]);
 
   useEffect(() => {
-    const socket = io(process.env.NEXT_PUBLIC_API_URL || '');
+    const socket = io(process.env.NEXT_PUBLIC_API_URL || '', { extraHeaders: { 'ngrok-skip-browser-warning': 'true' } });
 
     socket.on('connect', () => setConexionSocket(true));
     socket.on('disconnect', () => setConexionSocket(false));

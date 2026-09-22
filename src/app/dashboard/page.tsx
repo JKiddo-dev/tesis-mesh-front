@@ -90,7 +90,7 @@ export default function DashboardIndex() {
     fetchSettings();
     fetchUltimasPosiciones();
 
-    const socket = io(process.env.NEXT_PUBLIC_API_URL || '');
+    const socket = io(process.env.NEXT_PUBLIC_API_URL || '', { extraHeaders: { 'ngrok-skip-browser-warning': 'true' } });
 
     socket.on('connect', () => setConexionStatus(true));
     socket.on('disconnect', () => setConexionStatus(false));

@@ -53,7 +53,7 @@ export default function UsuariosPage() {
     try {
       const token = localStorage.getItem('mesh_token');
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/telemetry/nodes`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { 'ngrok-skip-browser-warning': 'true', 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
         const data = await res.json();
@@ -68,7 +68,7 @@ export default function UsuariosPage() {
     try {
       const token = localStorage.getItem('mesh_token');
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/users`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { 'ngrok-skip-browser-warning': 'true', 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
         const data = await res.json();
@@ -105,7 +105,7 @@ export default function UsuariosPage() {
       const token = localStorage.getItem('mesh_token');
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/users/${id}`, {
         method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { 'ngrok-skip-browser-warning': 'true', 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) setUsuarios(usuarios.filter(user => user._id !== id));
     } catch (error) {
@@ -123,7 +123,7 @@ export default function UsuariosPage() {
       };
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/users`, {
         method: 'POST',
-        headers: { 
+        headers: { 'ngrok-skip-browser-warning': 'true', 
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}` 
         },
@@ -171,7 +171,7 @@ export default function UsuariosPage() {
       };
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/users/${usuarioEditando._id}`, {
         method: 'PATCH',
-        headers: { 
+        headers: { 'ngrok-skip-browser-warning': 'true', 
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}` 
         },
@@ -194,7 +194,7 @@ export default function UsuariosPage() {
       const token = localStorage.getItem('mesh_token');
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/users/${usuarioAsignandoRadio._id}`, {
         method: 'PATCH',
-        headers: { 
+        headers: { 'ngrok-skip-browser-warning': 'true', 
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}` 
         },

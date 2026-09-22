@@ -52,7 +52,7 @@ export default function AnalyticsPage() {
       try {
         const token = localStorage.getItem('mesh_token');
         const respuesta = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/telemetry/analytics`, {
-          headers: {
+          headers: { 'ngrok-skip-browser-warning': 'true',
             'Authorization': `Bearer ${token}`
           }
         });

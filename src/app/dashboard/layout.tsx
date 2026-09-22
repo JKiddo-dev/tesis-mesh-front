@@ -22,7 +22,7 @@ export default function DashboardLayout({
   const [notificacionActiva, setNotificacionActiva] = useState<AlertaNotificacion | null>(null);
 
   useEffect(() => {
-    const socket = io(process.env.NEXT_PUBLIC_API_URL || '');
+    const socket = io(process.env.NEXT_PUBLIC_API_URL || '', { extraHeaders: { 'ngrok-skip-browser-warning': 'true' } });
 
     socket.on('nuevoMensajeMesh', (data) => {
       const payloadObj = data?.payload;

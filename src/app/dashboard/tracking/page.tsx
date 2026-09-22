@@ -30,7 +30,7 @@ export default function TrackeoPage() {
       try {
         const token = localStorage.getItem('mesh_token');
         const respuesta = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/telemetry/nodes`, {
-          headers: {
+          headers: { 'ngrok-skip-browser-warning': 'true',
             'Authorization': `Bearer ${token}`
           }
         });
@@ -74,7 +74,7 @@ export default function TrackeoPage() {
     try {
       const token = localStorage.getItem('mesh_token');
       const respuesta = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/telemetry/history`, {
-        headers: {
+        headers: { 'ngrok-skip-browser-warning': 'true',
           'Authorization': `Bearer ${token}`
         }
       });

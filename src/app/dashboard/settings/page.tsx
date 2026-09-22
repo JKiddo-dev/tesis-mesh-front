@@ -39,7 +39,7 @@ export default function SettingsPage() {
       try {
         const token = localStorage.getItem('mesh_token'); 
         const res = await fetch(`${API_URL}/settings`, {
-          headers: {
+          headers: { 'ngrok-skip-browser-warning': 'true',
             "Authorization": `Bearer ${token}` 
           }
         });
@@ -78,7 +78,7 @@ export default function SettingsPage() {
 
       const res = await fetch(`${API_URL}/settings`, {
         method: "PUT",
-        headers: {
+        headers: { 'ngrok-skip-browser-warning': 'true',
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}` 
         },

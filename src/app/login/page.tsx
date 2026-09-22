@@ -20,7 +20,7 @@ export default function LoginPage() {
     try {
       const respuesta = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
         method: 'POST',
-        headers: {
+        headers: { 'ngrok-skip-browser-warning': 'true',
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ email, password }),
