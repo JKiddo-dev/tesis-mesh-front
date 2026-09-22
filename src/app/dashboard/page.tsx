@@ -1,4 +1,3 @@
-export const dynamic = 'force-dynamic';
 'use client';
 
 import dynamic from 'next/dynamic';
@@ -41,7 +40,7 @@ export default function DashboardIndex() {
 
     const fetchSettings = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/settings`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/settings`, { cache: 'no-store',
           headers: { "Authorization": `Bearer ${token}` }
         });
         if (res.ok) {
@@ -61,7 +60,7 @@ export default function DashboardIndex() {
 
     const fetchUltimasPosiciones = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/telemetry/history`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/telemetry/history`, { cache: 'no-store',
           headers: { "Authorization": `Bearer ${token}` }
         });
         if (res.ok) {

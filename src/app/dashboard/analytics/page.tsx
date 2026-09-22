@@ -1,4 +1,3 @@
-export const dynamic = 'force-dynamic';
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -52,7 +51,7 @@ export default function AnalyticsPage() {
     const cargarAnaliticas = async () => {
       try {
         const token = localStorage.getItem('mesh_token');
-        const respuesta = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/telemetry/analytics`, {
+        const respuesta = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/telemetry/analytics`, { cache: 'no-store',
           headers: { 'ngrok-skip-browser-warning': 'true',
             'Authorization': `Bearer ${token}`
           }

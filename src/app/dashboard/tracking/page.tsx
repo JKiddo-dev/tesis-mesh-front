@@ -1,4 +1,3 @@
-export const dynamic = 'force-dynamic';
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -30,7 +29,7 @@ export default function TrackeoPage() {
     const cargarNodos = async () => {
       try {
         const token = localStorage.getItem('mesh_token');
-        const respuesta = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/telemetry/nodes`, {
+        const respuesta = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/telemetry/nodes`, { cache: 'no-store',
           headers: { 'ngrok-skip-browser-warning': 'true',
             'Authorization': `Bearer ${token}`
           }
@@ -74,7 +73,7 @@ export default function TrackeoPage() {
     setCargando(true);
     try {
       const token = localStorage.getItem('mesh_token');
-      const respuesta = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/telemetry/history`, {
+      const respuesta = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/telemetry/history`, { cache: 'no-store',
         headers: { 'ngrok-skip-browser-warning': 'true',
           'Authorization': `Bearer ${token}`
         }

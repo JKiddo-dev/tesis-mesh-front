@@ -1,4 +1,3 @@
-export const dynamic = 'force-dynamic';
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -53,7 +52,7 @@ export default function UsuariosPage() {
   const cargarNodosActivos = async () => {
     try {
       const token = localStorage.getItem('mesh_token');
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/telemetry/nodes`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/telemetry/nodes`, { cache: 'no-store',
         headers: { 'ngrok-skip-browser-warning': 'true', 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
@@ -68,7 +67,7 @@ export default function UsuariosPage() {
   const cargarUsuarios = async () => {
     try {
       const token = localStorage.getItem('mesh_token');
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/users`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/users`, { cache: 'no-store',
         headers: { 'ngrok-skip-browser-warning': 'true', 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
@@ -104,7 +103,7 @@ export default function UsuariosPage() {
     if (!window.confirm(`¿Estás seguro de que deseas eliminar a ${nombre}?`)) return;
     try {
       const token = localStorage.getItem('mesh_token');
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/users/${id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/users/${id}`, { cache: 'no-store',
         method: 'DELETE',
         headers: { 'ngrok-skip-browser-warning': 'true', 'Authorization': `Bearer ${token}` }
       });
@@ -122,7 +121,7 @@ export default function UsuariosPage() {
         ...nuevoUser,
         nodoId: nuevoUser.nodoId.trim() === '' ? null : nuevoUser.nodoId.trim()
       };
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/users`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/users`, { cache: 'no-store',
         method: 'POST',
         headers: { 'ngrok-skip-browser-warning': 'true', 
           'Content-Type': 'application/json',
@@ -170,7 +169,7 @@ export default function UsuariosPage() {
         ...usuarioEditando,
         nodoId: usuarioEditando.nodoId.trim() === '' ? null : usuarioEditando.nodoId.trim()
       };
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/users/${usuarioEditando._id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/users/${usuarioEditando._id}`, { cache: 'no-store',
         method: 'PATCH',
         headers: { 'ngrok-skip-browser-warning': 'true', 
           'Content-Type': 'application/json',
@@ -193,7 +192,7 @@ export default function UsuariosPage() {
     e.preventDefault();
     try {
       const token = localStorage.getItem('mesh_token');
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/users/${usuarioAsignandoRadio._id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/users/${usuarioAsignandoRadio._id}`, { cache: 'no-store',
         method: 'PATCH',
         headers: { 'ngrok-skip-browser-warning': 'true', 
           'Content-Type': 'application/json',

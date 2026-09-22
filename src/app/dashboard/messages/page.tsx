@@ -1,4 +1,3 @@
-export const dynamic = 'force-dynamic';
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -105,7 +104,7 @@ export default function MensajesPage() {
     const cargarDirectorio = async () => {
       try {
         const token = localStorage.getItem('mesh_token');
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/node-directory`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/node-directory`, { cache: 'no-store',
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (res.ok) {
@@ -120,7 +119,7 @@ export default function MensajesPage() {
     const cargarNodos = async () => {
       try {
         const token = localStorage.getItem('mesh_token');
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/telemetry/nodes`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/telemetry/nodes`, { cache: 'no-store',
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (res.ok) {
@@ -138,7 +137,7 @@ export default function MensajesPage() {
     const cargarHistorial = async () => {
       try {
         const token = localStorage.getItem('mesh_token');
-        const respuesta = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/telemetry/messages`, {
+        const respuesta = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/telemetry/messages`, { cache: 'no-store',
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (respuesta.ok) {
@@ -161,7 +160,7 @@ export default function MensajesPage() {
     setCargandoDirectos(true);
     try {
       const token = localStorage.getItem('mesh_token');
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/telemetry/direct/${encodeURIComponent(origen)}/${encodeURIComponent(destino)}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/telemetry/direct/${encodeURIComponent(origen)}/${encodeURIComponent(destino)}`, { cache: 'no-store',
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
@@ -223,7 +222,7 @@ export default function MensajesPage() {
 
     try {
       const token = localStorage.getItem('mesh_token');
-      const respuesta = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/telemetry/nodes/${nodoId}`, {
+      const respuesta = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/telemetry/nodes/${nodoId}`, { cache: 'no-store',
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -242,7 +241,7 @@ export default function MensajesPage() {
     setEnviando(true);
     try {
       const token = localStorage.getItem('mesh_token');
-      const respuesta = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/telemetry/send`, {
+      const respuesta = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/telemetry/send`, { cache: 'no-store',
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

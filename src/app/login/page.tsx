@@ -1,4 +1,3 @@
-export const dynamic = 'force-dynamic';
 'use client'; 
 
 import { useState } from 'react';
@@ -19,7 +18,7 @@ export default function LoginPage() {
     setCargando(true); 
 
     try {
-      const respuesta = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
+      const respuesta = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, { cache: 'no-store',
         method: 'POST',
         headers: { 'ngrok-skip-browser-warning': 'true',
           'Content-Type': 'application/json',

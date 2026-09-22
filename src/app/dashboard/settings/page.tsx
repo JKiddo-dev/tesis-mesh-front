@@ -1,4 +1,3 @@
-export const dynamic = 'force-dynamic';
 "use client";
 import { useState, useEffect } from "react";
 import { ShieldAlert } from "lucide-react";
@@ -39,7 +38,7 @@ export default function SettingsPage() {
     const fetchSettings = async () => {
       try {
         const token = localStorage.getItem('mesh_token'); 
-        const res = await fetch(`${API_URL}/settings`, {
+        const res = await fetch(`${API_URL}/settings`, { cache: 'no-store',
           headers: { 'ngrok-skip-browser-warning': 'true',
             "Authorization": `Bearer ${token}` 
           }
@@ -77,7 +76,7 @@ export default function SettingsPage() {
     try {
       const token = localStorage.getItem('mesh_token'); 
 
-      const res = await fetch(`${API_URL}/settings`, {
+      const res = await fetch(`${API_URL}/settings`, { cache: 'no-store',
         method: "PUT",
         headers: { 'ngrok-skip-browser-warning': 'true',
           "Content-Type": "application/json",
