@@ -41,7 +41,7 @@ export default function DashboardIndex() {
     const fetchSettings = async () => {
       try {
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/settings`, { cache: 'no-store',
-          headers: { "Authorization": `Bearer ${token}` }
+          headers: { 'ngrok-skip-browser-warning': 'true',  "Authorization": `Bearer ${token}` }
         });
         if (res.ok) {
           const data = await res.json();
@@ -61,7 +61,7 @@ export default function DashboardIndex() {
     const fetchUltimasPosiciones = async () => {
       try {
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/telemetry/history`, { cache: 'no-store',
-          headers: { "Authorization": `Bearer ${token}` }
+          headers: { 'ngrok-skip-browser-warning': 'true',  "Authorization": `Bearer ${token}` }
         });
         if (res.ok) {
           const historial = await res.json();

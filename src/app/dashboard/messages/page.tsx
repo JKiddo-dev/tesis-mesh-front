@@ -105,7 +105,7 @@ export default function MensajesPage() {
       try {
         const token = localStorage.getItem('mesh_token');
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/node-directory`, { cache: 'no-store',
-          headers: { 'Authorization': `Bearer ${token}` }
+          headers: { 'ngrok-skip-browser-warning': 'true',  'Authorization': `Bearer ${token}` }
         });
         if (res.ok) {
           const data = await res.json();
@@ -120,7 +120,7 @@ export default function MensajesPage() {
       try {
         const token = localStorage.getItem('mesh_token');
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/telemetry/nodes`, { cache: 'no-store',
-          headers: { 'Authorization': `Bearer ${token}` }
+          headers: { 'ngrok-skip-browser-warning': 'true',  'Authorization': `Bearer ${token}` }
         });
         if (res.ok) {
           const data = await res.json();
@@ -138,7 +138,7 @@ export default function MensajesPage() {
       try {
         const token = localStorage.getItem('mesh_token');
         const respuesta = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/telemetry/messages`, { cache: 'no-store',
-          headers: { 'Authorization': `Bearer ${token}` }
+          headers: { 'ngrok-skip-browser-warning': 'true',  'Authorization': `Bearer ${token}` }
         });
         if (respuesta.ok) {
           const historial = await respuesta.json();
@@ -161,7 +161,7 @@ export default function MensajesPage() {
     try {
       const token = localStorage.getItem('mesh_token');
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/telemetry/direct/${encodeURIComponent(origen)}/${encodeURIComponent(destino)}`, { cache: 'no-store',
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { 'ngrok-skip-browser-warning': 'true',  'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
         const data = await res.json();
@@ -224,7 +224,7 @@ export default function MensajesPage() {
       const token = localStorage.getItem('mesh_token');
       const respuesta = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/telemetry/nodes/${nodoId}`, { cache: 'no-store',
         method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { 'ngrok-skip-browser-warning': 'true',  'Authorization': `Bearer ${token}` }
       });
       if (respuesta.ok) {
         setMensajes((prev) => prev.filter(m => String(m.nodoOrigen) !== String(nodoId)));
@@ -243,7 +243,7 @@ export default function MensajesPage() {
       const token = localStorage.getItem('mesh_token');
       const respuesta = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/telemetry/send`, { cache: 'no-store',
         method: 'POST',
-        headers: {
+        headers: { 'ngrok-skip-browser-warning': 'true', 
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
