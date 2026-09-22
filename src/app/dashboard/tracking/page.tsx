@@ -29,7 +29,7 @@ export default function TrackeoPage() {
     const cargarNodos = async () => {
       try {
         const token = localStorage.getItem('mesh_token');
-        const respuesta = await fetch('http://localhost:4000/telemetry/nodes', {
+        const respuesta = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/telemetry/nodes`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -73,7 +73,7 @@ export default function TrackeoPage() {
     setCargando(true);
     try {
       const token = localStorage.getItem('mesh_token');
-      const respuesta = await fetch('http://localhost:4000/telemetry/history', {
+      const respuesta = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/telemetry/history`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }

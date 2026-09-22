@@ -51,7 +51,7 @@ export default function AnalyticsPage() {
     const cargarAnaliticas = async () => {
       try {
         const token = localStorage.getItem('mesh_token');
-        const respuesta = await fetch('http://localhost:4000/telemetry/analytics', {
+        const respuesta = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/telemetry/analytics`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }

@@ -104,7 +104,7 @@ export default function MensajesPage() {
     const cargarDirectorio = async () => {
       try {
         const token = localStorage.getItem('mesh_token');
-        const res = await fetch('http://localhost:4000/auth/node-directory', {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/node-directory`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (res.ok) {
@@ -119,7 +119,7 @@ export default function MensajesPage() {
     const cargarNodos = async () => {
       try {
         const token = localStorage.getItem('mesh_token');
-        const res = await fetch('http://localhost:4000/telemetry/nodes', {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/telemetry/nodes`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (res.ok) {
@@ -137,7 +137,7 @@ export default function MensajesPage() {
     const cargarHistorial = async () => {
       try {
         const token = localStorage.getItem('mesh_token');
-        const respuesta = await fetch('http://localhost:4000/telemetry/messages', {
+        const respuesta = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/telemetry/messages`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (respuesta.ok) {
@@ -160,7 +160,7 @@ export default function MensajesPage() {
     setCargandoDirectos(true);
     try {
       const token = localStorage.getItem('mesh_token');
-      const res = await fetch(`http://localhost:4000/telemetry/direct/${encodeURIComponent(origen)}/${encodeURIComponent(destino)}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/telemetry/direct/${encodeURIComponent(origen)}/${encodeURIComponent(destino)}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
@@ -181,7 +181,7 @@ export default function MensajesPage() {
   }, [nodoRemitente, nodoDestinatario]);
 
   useEffect(() => {
-    const socket = io('http://localhost:4000');
+    const socket = io(process.env.NEXT_PUBLIC_API_URL || '');
 
     socket.on('connect', () => setConexionSocket(true));
     socket.on('disconnect', () => setConexionSocket(false));
@@ -222,7 +222,7 @@ export default function MensajesPage() {
 
     try {
       const token = localStorage.getItem('mesh_token');
-      const respuesta = await fetch(`http://localhost:4000/telemetry/nodes/${nodoId}`, {
+      const respuesta = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/telemetry/nodes/${nodoId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -241,7 +241,7 @@ export default function MensajesPage() {
     setEnviando(true);
     try {
       const token = localStorage.getItem('mesh_token');
-      const respuesta = await fetch('http://localhost:4000/telemetry/send', {
+      const respuesta = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/telemetry/send`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

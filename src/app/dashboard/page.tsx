@@ -40,7 +40,7 @@ export default function DashboardIndex() {
 
     const fetchSettings = async () => {
       try {
-        const res = await fetch('http://localhost:4000/settings', {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/settings`, {
           headers: { "Authorization": `Bearer ${token}` }
         });
         if (res.ok) {
@@ -60,7 +60,7 @@ export default function DashboardIndex() {
 
     const fetchUltimasPosiciones = async () => {
       try {
-        const res = await fetch('http://localhost:4000/telemetry/history', {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/telemetry/history`, {
           headers: { "Authorization": `Bearer ${token}` }
         });
         if (res.ok) {
@@ -90,7 +90,7 @@ export default function DashboardIndex() {
     fetchSettings();
     fetchUltimasPosiciones();
 
-    const socket = io('http://localhost:4000');
+    const socket = io(process.env.NEXT_PUBLIC_API_URL || '');
 
     socket.on('connect', () => setConexionStatus(true));
     socket.on('disconnect', () => setConexionStatus(false));

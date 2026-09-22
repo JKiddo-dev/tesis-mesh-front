@@ -52,7 +52,7 @@ export default function UsuariosPage() {
   const cargarNodosActivos = async () => {
     try {
       const token = localStorage.getItem('mesh_token');
-      const res = await fetch('http://localhost:4000/telemetry/nodes', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/telemetry/nodes`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
@@ -67,7 +67,7 @@ export default function UsuariosPage() {
   const cargarUsuarios = async () => {
     try {
       const token = localStorage.getItem('mesh_token');
-      const res = await fetch('http://localhost:4000/auth/users', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/users`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
@@ -103,7 +103,7 @@ export default function UsuariosPage() {
     if (!window.confirm(`¿Estás seguro de que deseas eliminar a ${nombre}?`)) return;
     try {
       const token = localStorage.getItem('mesh_token');
-      const res = await fetch(`http://localhost:4000/auth/users/${id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/users/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -121,7 +121,7 @@ export default function UsuariosPage() {
         ...nuevoUser,
         nodoId: nuevoUser.nodoId.trim() === '' ? null : nuevoUser.nodoId.trim()
       };
-      const res = await fetch('http://localhost:4000/auth/users', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/users`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -169,7 +169,7 @@ export default function UsuariosPage() {
         ...usuarioEditando,
         nodoId: usuarioEditando.nodoId.trim() === '' ? null : usuarioEditando.nodoId.trim()
       };
-      const res = await fetch(`http://localhost:4000/auth/users/${usuarioEditando._id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/users/${usuarioEditando._id}`, {
         method: 'PATCH',
         headers: { 
           'Content-Type': 'application/json',
@@ -192,7 +192,7 @@ export default function UsuariosPage() {
     e.preventDefault();
     try {
       const token = localStorage.getItem('mesh_token');
-      const res = await fetch(`http://localhost:4000/auth/users/${usuarioAsignandoRadio._id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/users/${usuarioAsignandoRadio._id}`, {
         method: 'PATCH',
         headers: { 
           'Content-Type': 'application/json',
